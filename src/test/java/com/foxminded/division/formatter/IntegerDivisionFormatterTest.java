@@ -143,13 +143,13 @@ class IntegerDivisionFormatterTest {
         divisionSteps.add(new DivisionStep(4, 0, 4));
         divisionSteps.add(new DivisionStep(6, 0, 6));
         divisionSteps.add(new DivisionStep(0, 0, 0));
-        DivisionResult divisionResult = new DivisionResult(dividend * -1, divisor, 23, divisionSteps);
+        DivisionResult divisionResult = new DivisionResult(dividend * -1, divisor, -23, divisionSteps);
         String actual = formatter.formatDivisionResult(divisionResult);
 
         String expected =
                 "_46|2" + "\n" +
-                " 4 |--" + "\n" +
-                " - |23" + "\n" +
+                " 4 |---" + "\n" +
+                " - |-23" + "\n" +
                 " _6" + "\n" +
                 "  6" + "\n" +
                 "  -" + "\n" +

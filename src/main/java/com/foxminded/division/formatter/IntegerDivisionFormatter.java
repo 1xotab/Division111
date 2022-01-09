@@ -4,6 +4,7 @@ import com.foxminded.division.model.DivisionResult;
 import com.foxminded.division.model.DivisionStep;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class IntegerDivisionFormatter {
     private static final String SPACE = " ";
@@ -41,14 +42,14 @@ public class IntegerDivisionFormatter {
     private String createDivisionBody(DivisionResult divisionResult) {
 
         StringBuilder result = new StringBuilder();
+        int[] dividendDigits = convertNumberToDigits(divisionResult.getDividend());
         int measuredLineLength = (MINUS + divisionResult.getSteps().get(1).getElementaryDividend()).length();
 
         for (int i = 1; i < divisionResult.getSteps().size() - 1; i++) {
 
-            int elementaryDividend = divisionResult.getSteps().get(i).getElementaryDividend();
-            ArrayList<Integer> indents = indentCalculator(divisionResult);
-
             DivisionStep currentStep = divisionResult.getSteps().get(i);
+            int elementaryDividend = divisionResult.getSteps().get(i).getElementaryDividend();
+            ArrayList<Integer> indents = indentCalculator(divisionResult,dividendDigits);
             int currentIndent = indents.get(i-1);
 
             result.append(formatStep(currentStep, currentIndent));
@@ -56,15 +57,11 @@ public class IntegerDivisionFormatter {
         }
 
 
+        List<DivisionStep> steps = divisionResult.getSteps();
+        int lastRemainder = divisionResult.getSteps().get(steps.size()-1).getRemainder();
+        int remainderIntend = getRemainderIndent(steps,dividendDigits,lastRemainder,measuredLineLength);
 
-        int[] dividendDigits = convertNumberToDigits(divisionResult.getDividend());
-        int lastStepIndex = divisionResult.getSteps().size() - 1;
-        int remainderIntend;
-        if (divisionResult.getSteps().size() == 2) {
-            remainderIntend = 1 + dividendDigits.length - calculateNumberLength(divisionResult.getSteps().get(lastStepIndex).getRemainder());
-        } else
-            remainderIntend = measuredLineLength - calculateNumberLength(divisionResult.getSteps().get(lastStepIndex).getRemainder());
-            result.append(NEWLINE + SPACE.repeat(remainderIntend) + divisionResult.getSteps().get(lastStepIndex).getRemainder());
+        result.append(NEWLINE).append(SPACE.repeat(remainderIntend)).append(lastRemainder);
 
         return result.toString();
     }
@@ -76,7 +73,7 @@ public class IntegerDivisionFormatter {
             + SPACE.repeat(indent-2)
             + MINUS + step.getElementaryDividend()
             + NEWLINE
-            + SPACE.repeat(indent-1+sizeDifference(step.getElementaryDividend(),step.getDivisorMultiple()))
+            + SPACE.repeat(indent-1+calculateNumberLength(step.getElementaryDividend())-calculateNumberLength(step.getDivisorMultiple()))
             + step.getDivisorMultiple()
             + NEWLINE
             + SPACE.repeat(indent-1)
@@ -86,34 +83,33 @@ public class IntegerDivisionFormatter {
     private int calculateNumberLength(int number) {
         return String.valueOf(Math.abs(number)).length();
     }
-    private int sizeDifference(int i, int j){
-        return calculateNumberLength(i)-calculateNumberLength(j);
-    }
 
     private int calculateDashAmount(int quotient, int divisor) {
-        int dashAmount;
 
+        int longestNumber=quotient;
         if (calculateNumberLength(divisor) >= calculateNumberLength(quotient)) {
-            dashAmount = calculateNumberLength(divisor);
-
-            if (divisor < 0) {
-                dashAmount++;
-            }
-        } else {
-            dashAmount = calculateNumberLength(quotient);
-            if (quotient < 0) {
-                dashAmount++;
-            }
+            longestNumber=divisor;
         }
+        int dashAmount = calculateNumberLength(longestNumber);
+
+        if(longestNumber<0){
+            dashAmount++;
+        }
+
         return dashAmount;
     }
     private int additionalSpacesCalculator(int[] dividendDigits,int start){
-        int i = start;
+
         int counter=0;
-        while (dividendDigits[i]==0){
-            counter++;
-            i++;
+
+        for(int i=start;i<dividendDigits.length;i++){
+
+            if(dividendDigits[i]==0){
+                counter++;
+            }
+            else i=dividendDigits.length;
         }
+
         return counter;
     }
 
@@ -129,15 +125,12 @@ public class IntegerDivisionFormatter {
         return calculateNumberLength(dividend);
     }
 
-    private ArrayList<Integer> indentCalculator(DivisionResult divisionResult) {
+    private ArrayList<Integer> indentCalculator(DivisionResult divisionResult,int [] dividendDigits) {
 
         ArrayList<Integer> arrayOfIntends = new ArrayList<>();
 
         int indent = 2;
-        int[] dividendDigits = convertNumberToDigits(divisionResult.getDividend());
-
         int measuredLineLength = (MINUS + divisionResult.getSteps().get(1).getElementaryDividend()).length();
-
 
         for (int i = 1; i < divisionResult.getSteps().size() - 1; i++) {
 
@@ -146,24 +139,32 @@ public class IntegerDivisionFormatter {
             int previousElementaryDividend = divisionResult.getSteps().get(i - 1).getElementaryDividend();
             int elementaryDividend = divisionResult.getSteps().get(i).getElementaryDividend();
 
-
             if (i != 1) {
-                indent = indent + sizeDifference(previousElementaryDividend, previousDivisorMultiple);
+                indent = indent + calculateNumberLength(previousElementaryDividend) - calculateNumberLength(previousDivisorMultiple);
             }
-
-            indent = indent + sizeDifference(previousDivisorMultiple, previousRemainder);
-
+            indent = indent + calculateNumberLength(previousDivisorMultiple) - calculateNumberLength(previousRemainder);
 
             if (previousRemainder == 0) {
                 indent = 1 + indent + additionalSpacesCalculator(dividendDigits, measuredLineLength - 1);
             }
-
             measuredLineLength = (SPACE.repeat(indent - 2) + MINUS + elementaryDividend).length();
 
             arrayOfIntends.add(indent);
         }
 
         return arrayOfIntends;
+    }
+    private int getRemainderIndent(List<DivisionStep> steps,int[] dividendDigits,int lastRemainder,int measuredLineLength){
+
+        int lastRemainderLength = calculateNumberLength(lastRemainder);
+        int remainderIntend;
+
+        if (steps.size() == 2) {
+            remainderIntend = 1 + dividendDigits.length - lastRemainderLength;
+        } else
+            remainderIntend = measuredLineLength - lastRemainderLength;
+
+        return remainderIntend;
     }
 
 
