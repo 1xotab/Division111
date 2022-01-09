@@ -95,7 +95,7 @@ class IntegerDivisionCalculatorTest {
         expectedSteps.add(new DivisionStep(22, 2, 20));
         expectedSteps.add(new DivisionStep(0, 2, 0));
 
-        DivisionResult expected = new DivisionResult(-dividend, divisor, 5, expectedSteps);
+        DivisionResult expected = new DivisionResult(-dividend, divisor, -5, expectedSteps);
 
         assertEquals(expected, actual);
     }

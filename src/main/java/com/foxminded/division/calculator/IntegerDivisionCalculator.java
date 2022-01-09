@@ -18,7 +18,19 @@ public class IntegerDivisionCalculator {
             divisionSteps.add(new DivisionStep(dividend,dividend,0));
         }
 
+        divisionSteps.addAll(createMiddleSteps(dividendDigits,divisor));
+        return new DivisionResult(dividend, divisor, quotient, divisionSteps);
+
+    }
+
+    private int[] convertNumberToDigits(int convertible) {
+        return Integer.toString(convertible).chars().map(c -> c - '0').toArray();
+    }
+
+    private ArrayList<DivisionStep> createMiddleSteps(int[] dividendDigits, int divisor){
+
         int remainder = 0;
+        ArrayList<DivisionStep> divisionSteps = new ArrayList<>();
 
         for (int i = 0;i<dividendDigits.length;i++) {
 
@@ -35,13 +47,7 @@ public class IntegerDivisionCalculator {
             }
         }
 
-
-        return new DivisionResult(dividend, divisor, quotient, divisionSteps);
-
-    }
-
-    private int[] convertNumberToDigits(int convertible) {
-        return Integer.toString(convertible).chars().map(c -> c - '0').toArray();
+        return divisionSteps;
     }
 
     private int combineNumbers(int x, int y) {

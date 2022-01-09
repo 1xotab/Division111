@@ -6,13 +6,17 @@ import com.foxminded.division.model.DivisionResult;
 
 public class Application {
     public static void main(String[] args) {
-        int dividend = 123;
-        int divisor = 1000;
+        int dividend = 642;
+        int divisor = 2;
+
         IntegerDivisionCalculator calculator = new IntegerDivisionCalculator();
         IntegerDivisionFormatter formatter = new IntegerDivisionFormatter();
         DivisionResult result = calculator.calculateDivisionResult(dividend, divisor);
         System.out.println(formatter.formatDivisionResult(result));
         System.out.println(result);
+
+
+
     }
 }
 
